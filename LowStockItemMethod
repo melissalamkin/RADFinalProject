@@ -1,0 +1,21 @@
+public class getLowStockItems {  
+    
+    /**We need a method that can be called from elsewhere in our codebase called getLowStockItems
+	*This should return a list of all the Stock Items that have a stock on hand count at or below their minimum stock level.
+	*It should include the following fields for the Stock Items it returns:
+		*ID
+		*Item_Name__c
+		*Item_Stock_is_Low__c
+		*Minimum_Stock_Level__c 
+		*Stock_on_Hand__c
+	*/
+    
+    public static List <Stock_Item__c> getLowStock() {
+    
+    //Query for the stock level where stock on hand is equal or below the minum stock level
+    
+    List <Stock_Item__c> lowStockList = [SELECT ID, Item_Name__c, Item_Stock_is_Low__c, Minimum_Stock_Level__c, Stock_on_Hand__c FROM Stock_Item__c WHERE Stock_on_Hand__c <= Minimum_Stock_Level__c];
+
+        return lowStockList;
+    }
+}
