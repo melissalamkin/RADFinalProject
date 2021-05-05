@@ -14,7 +14,7 @@ public class getLowStockItems {
     
     //Query for the stock level where stock on hand is equal or below the minum stock level
     
-    List <Stock_Item__c> lowStockList = [SELECT ID, Item_Name__c, Item_Stock_is_Low__c, Minimum_Stock_Level__c, Stock_on_Hand__c FROM Stock_Item__c WHERE Stock_on_Hand__c <= Minimum_Stock_Level__c];
+    List <Stock_Item__c> lowStockList = [SELECT ID, Item_Name__c, Item_Stock_is_Low__c, Minimum_Stock_Level__c, Stock_on_Hand__c FROM Stock_Item__c WHERE Item_Stock_is_Low__c  = TRUE];
 
         return lowStockList;
     }
