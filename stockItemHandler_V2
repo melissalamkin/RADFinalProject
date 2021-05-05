@@ -1,0 +1,70 @@
+/**
+ * A Utility class to process Stock Item records from the Stock Item Handler
+ */
+public with sharing class StockItemHandler {
+    
+    /**
+     * Class constructor.
+     */
+    public StockItemHandler() {
+        
+    }
+
+    //Create methods here to handle the before insert, before delete and utility processes described in the requirements
+    //They should accept lists of Stock_Item__c records from the trigger
+	public static void onBeforeInsert(List<Stock_Item__c> newStockItems) {
+       	
+        //List the stock items where the Item Name is found in the newStockItems list.
+        List <String> listOfNewItemName = new List <String>();
+        for (Stock_Item__c itemName : newStockItems) {
+            listOfNewItemName.add(itemName.Item_Name__c );
+        }
+            
+            
+        List<Stock_Item__c> duplicateStockItems = [SELECT Id, Item_Name__c FROM Stock_Item__c WHERE Item_Name__c in:listOfNewItemName];
+		
+        //any resulting duplicates in the duplicateStockItems list will give > 0
+        
+        if(duplicateStockItems.size() > 0) 
+        {
+      
+    		//create a set of the duplicates found in the duplicate stock items
+            Set<String> duplicateNames = new Set<String>();
+            for (Stock_Item__c duplicateItem : duplicateStockItems) {
+                duplicateNames.add(duplicateItem.Item_Name__c);
+            }
+
+            //Now rename the any new items with a duplicate in the database
+            for (Stock_Item__c item : newStockItems) {
+                //if there is a duplicate, the item must be renamed
+                if (duplicateNames.contains(item.Item_Name__c)) {
+                    //this  gives the Item Name an update with the flag 'Duplicate Item'
+                    item.Item_Name__c = item.Item_Name__c + ' Duplicate Item';
+                }
+            }
+        }
+    }
+    
+    //before delete, check the stock item inventory and create a case if at 0.
+    //create a list for deleted stock items
+    public static void onBeforeDelete(List<Stock_Item__c> StockItemsToDelete) {
+
+		//create a list of cases to be inserted
+        List<Case> casesToInsert = new List<Case>();
+
+        for (Stock_Item__c item : StockItemsToDelete) {
+            //if it's > 0, create a case with the stock item details for someone to follow up
+            if(item.Stock_on_Hand__c> 0) {
+                case c = new Case();
+                c.Status = 'New'; //pre-setting the values
+                c.Origin = 'User Generated'; 
+                c.Subject = 'Item Deleted - Stock on Hand';
+                c.Description = 'The item "' + item.Item_Name__c + '", Id#' + item.Id +
+                    ', was deleted with a Stock on Hand of ' + item.Stock_on_Hand__c + '.';
+                casestoInsert.add(c);
+            }
+            }
+	
+    }
+    
+}
